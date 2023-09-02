@@ -33,24 +33,3 @@ jobs:
         run: |
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-
-      - name: Render Amazon ECS task definition
-        id: render-web-container
-        uses: aws-actions/amazon-ecs-render-task-definition@v1
-        with:
-          task-definition: task_definition.json
-          container-name: docker-container
-          image: $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-          environment-variables: "LOG_LEVEL=info"
-
-      - name: Debug Task Definition
-        run: |
-          echo "Task Definition Contents:"
-          cat ${{ steps.render-web-container.outputs.task-definition }}
-
-      - name: Deploy to Amazon ECS service
-        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
-        with:
-          task-definition: ${{ steps.render-web-container.outputs.task-definition }}
-          service: dockerservice2
-          cluster: dockercluster
